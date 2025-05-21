@@ -1,0 +1,21 @@
+.main_container{
+
+    justify-content: center;
+    align-items: bottom;
+    text-align: center;
+    padding-top: 15%; 
+}
+.box{
+   justify-content: center;
+    align-items: center;
+    text-align: center;
+    size: 500px;
+
+}
+.b1{
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    padding: 100px;
+    font-family: 'Courier New', Courier, monospace;
+}
