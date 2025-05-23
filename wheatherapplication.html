@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #71b7e6, #9b59b6);
+            color: #fff;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 300px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            width: 80%;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .weather-info {
+            margin-top: 20px;
+        }
+        .weather-info img {
+            width: 50px;
+        }
+        .error {
+            color: #ff4444;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .loading {
+            color: #fff;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Weather App</h2>
+        <input type="text" id="cityInput" placeholder="Enter city (e.g., London,UK)">
+        <button id="getWeatherBtn" onclick="getWeather()">Get Weather</button>
+        <div class="weather-info" id="weatherInfo">
+            <div id="temperature"></div>
+            <div id="description"></div>
+            <div id="icon"></div>
+            <div id="error" class="error"></div>
+            <div id="loading" class="loading"></div>
+        </div>
+    </div>
+    <script>
+        const apiKey = 'd6dda228c780f0ca41d98672e624f012'; // Provided OpenWeatherMap API key
+        const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
+
+        async function getWeather() {
+            const city = document.getElementById('cityInput').value.trim();
+            const errorDiv = document.getElementById('error');
+            const temperatureDiv = document.getElementById('temperature');
+            const descriptionDiv = document.getElementById('description');
+            const iconDiv = document.getElementById('icon');
+            const loadingDiv = document.getElementById('loading');
+            const button = document.getElementById('getWeatherBtn');
+
+            // Clear previous data
+            errorDiv.textContent = '';
+            temperatureDiv.textContent = '';
+            descriptionDiv.textContent = '';
+            iconDiv.innerHTML = '';
+            loadingDiv.textContent = '';
+
+            if (!city) {
+                errorDiv.textContent = 'Please enter a city name';
+                return;
+            }
+
+            // Disable button and show loading
+            button.disabled = true;
+            loadingDiv.textContent = 'Fetching weather...';
+
+            try {
+                const response = await fetch(`${apiUrl}?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('City not found. Try adding a country code (e.g., Paris,FR), check spelling, or use a major city.');
+                    } else if (response.status === 401) {
+                        throw new Error('Invalid API key. Please verify your API key at https://openweathermap.org/ or contact support.');
+                    } else {
+                        throw new Error(`Error ${response.status}: Unable to fetch weather data. Check your internet or try again later.`);
+                    }
+                }
+                const data = await response.json();
+
+                // Update DOM with weather data
+                temperatureDiv.textContent = `Temperature: ${Math.round(data.main.temp)}°C`;
+                descriptionDiv.textContent = `Weather: ${data.weather[0].description}`;
+                iconDiv.innerHTML = `<img src="https://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="Weather Icon">`;
+            } catch (error) {
+                console.error('Weather App Error:', error); // Log to console for debugging
+                errorDiv.textContent = error.message;
+                if (error.message.includes('Failed to fetch')) {
+                    errorDiv.textContent += ' This may be due to running the app locally. Host it on a server (e.g., use "Live Server" or Python\'s http.server).';
+                }
+            } finally {
+                // Re-enable button and clear loading
+                button.disabled = false;
+                loadingDiv.textContent = '';
+            }
+        }
+
+        // Allow pressing Enter to trigger weather fetch
+        document.getElementById('cityInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                getWeather();
+            }
+        });
+    </script>
+</body>
+</html>
