@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .quiz-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        .quiz-container h1 {
+            margin-bottom: 20px;
+        }
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #d0d0d0;
+        }
+        .option.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #next-btn, #restart-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #next-btn:hover, #restart-btn:hover {
+            background-color: #45a049;
+        }
+        #result {
+            display: none;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Quiz App</h1>
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <button id="next-btn">Next</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "What is the capital of France?",
+                options: ["Paris", "London", "Berlin", "Madrid"],
+                answer: "Paris"
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                answer: "Mars"
+            },
+            {
+                question: "What is 2 + 2?",
+                options: ["3", "4", "5", "6"],
+                answer: "4"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const nextButton = document.getElementById('next-btn');
+        const resultElement = document.getElementById('result');
+
+        function loadQuestion() {
+            const currentQuiz = quizData[currentQuestion];
+            questionElement.textContent = currentQuiz.question;
+            optionsElement.innerHTML = '';
+
+            currentQuiz.options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => selectOption(option));
+                optionsElement.appendChild(optionElement);
+            });
+
+            nextButton.style.display = 'none';
+        }
+
+        function selectOption(selected) {
+            const currentQuiz = quizData[currentQuestion];
+            const options = optionsElement.getElementsByClassName('option');
+            for (let option of options) {
+                option.classList.remove('selected');
+                if (option.textContent === selected) {
+                    option.classList.add('selected');
+                }
+            }
+            nextButton.style.display = 'block';
+
+            if (selected === currentQuiz.answer) {
+                score++;
+            }
+        }
+
+        function showResult() {
+            questionElement.style.display = 'none';
+            optionsElement.style.display = 'none';
+            nextButton.style.display = 'none';
+            resultElement.style.display = 'block';
+            resultElement.innerHTML = `You scored ${score} out of ${quizData.length}!<br><button id="restart-btn">Restart</button>`;
+            document.getElementById('restart-btn').addEventListener('click', restartQuiz);
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            questionElement.style.display = 'block';
+            optionsElement.style.display = 'flex';
+            resultElement.style.display = 'none';
+            loadQuestion();
+        }
+
+        nextButton.addEventListener('click', () => {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        });
+
+        loadQuestion();
+    </script>
+</body>
+</html>
